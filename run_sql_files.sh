@@ -4,9 +4,6 @@
 # Export SA_PASSWORD if it's not set
 export SA_PASSWORD="${SA_PASSWORD:-MyStrongPassword123!}"
 
-# Log the password (for debugging purposes, remove in production)
-echo "Using password: $SA_PASSWORD"
-
 # Start SQL Server in the background
 /opt/mssql/bin/sqlservr &
 

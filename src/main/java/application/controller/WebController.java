@@ -7,9 +7,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public interface WebController {
 
-//    public ResponseEntity<Response> login();
-//
-//    public ResponseEntity<Response> stockPrice();
+//    public ResponseEntity<Response> login(@PathVariable String userID);
+
+    public ResponseEntity<Response> deposit(@PathVariable String userID, @RequestParam int amount);
+
+    public ResponseEntity<Response> withdraw(@PathVariable String userID, @RequestParam int amount);
+
+    public ResponseEntity<Response> getStock(@PathVariable String stockName);
+
+    public ResponseEntity<Response> buy(@PathVariable String userID, @PathVariable String stockName, @RequestParam int amount);
+
+    public ResponseEntity<Response> sell(@PathVariable String userID, @PathVariable String stockName, @RequestParam int amount);
 
     public ResponseEntity<Response> getBalance(@PathVariable String userID);
 

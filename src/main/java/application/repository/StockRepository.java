@@ -1,10 +1,11 @@
 package application.repository;
 
-import application.model.Balance;
-import org.springframework.data.repository.CrudRepository;
+import application.model.Stock;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public interface BalanceRepository extends CrudRepository<Balance, String> {}
+public interface StockRepository extends JpaRepository<Stock, Integer> {
+}
