@@ -41,10 +41,12 @@ GO
 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'Stocks' AND xtype = 'U')
 BEGIN
     CREATE TABLE Stocks (
-        StockId INT IDENTITY(1,1) PRIMARY KEY,
+        StockId INT PRIMARY KEY,
         StockName CHAR(100),
         Value INT,
-        ValueLastUpdated DATETIME2
+        ValueLastUpdated DATETIME2,
+        CreatorId CHAR(10),
+        FOREIGN KEY (CreatorId) REFERENCES Users(UserId)
     );
 END
 GO

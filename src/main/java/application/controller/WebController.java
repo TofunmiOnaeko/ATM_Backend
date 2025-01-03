@@ -9,6 +9,8 @@ public interface WebController {
 
 //    public ResponseEntity<Response> login(@PathVariable String userID);
 
+    public ResponseEntity<Response> createStock(@PathVariable String userId, @RequestParam int value, @RequestParam String stockName);
+
     public ResponseEntity<Response> deposit(@PathVariable String userID, @RequestParam int amount);
 
     public ResponseEntity<Response> withdraw(@PathVariable String userID, @RequestParam int amount);
