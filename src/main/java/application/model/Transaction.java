@@ -20,6 +20,8 @@ public class Transaction {
     @Id
     private int transactionId;
     private String userId;
+    @ManyToOne
+    private User user;
     private int transactionAmount;
     private LocalDateTime timeOfTransaction;
     private String localCurrency;

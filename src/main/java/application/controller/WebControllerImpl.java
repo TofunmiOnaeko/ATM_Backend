@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -16,22 +17,22 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Slf4j
-@RestController
+@Controller
 @RequestMapping("/stockATM")
 public class WebControllerImpl implements WebController {
 
-    private ReadWriteLock lock = new ReentrantReadWriteLock();
     @Autowired
     private StockBalanceService stockBalanceService;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
 //    @Override
 //    public ResponseEntity<Response> login() {
 //
 //    }
 
-    @PostMapping("/createStock/{userId}/")
+    @PostMapping("/stock/create/{userId}/{stockName}")
     @Override
-    public ResponseEntity<Response> createStock(@PathVariable String userId, @RequestParam int value, @RequestParam String stockName) {
+    public ResponseEntity<Response> createStock(@PathVariable String userId, @PathVariable String stockName, @RequestParam int value) {
         if (stockBalanceService.createStock(userId, value, stockName, lock)) {
             return new ResponseEntity<>(new Response("Stock created successfully"), HttpStatus.OK);
         } else {
@@ -39,7 +40,7 @@ public class WebControllerImpl implements WebController {
         }
     }
 
-    @PostMapping("/deposit/{userId}")
+    @PostMapping("balance/deposit/{userId}")
     @Override
     public ResponseEntity<Response> deposit(@PathVariable String userID, @RequestParam int amount) {
         if (stockBalanceService.changeBalance(userID, amount, TransactionType.DEPOSIT, lock)) {
@@ -49,7 +50,7 @@ public class WebControllerImpl implements WebController {
         }
     }
 
-    @PostMapping("/withdraw/{userId}")
+    @PostMapping("balance/withdraw/{userId}")
     @Override
     public ResponseEntity<Response> withdraw(@PathVariable String userID, @RequestParam int amount) {
         if (stockBalanceService.changeBalance(userID, (amount * -1), TransactionType.WITHDRAWAL, lock)) {
@@ -59,41 +60,34 @@ public class WebControllerImpl implements WebController {
         }
     }
 
-    @PostMapping("/buy/{userId}/{stockName}")
+    @PostMapping("/stock/buy/{userId}/{stockName}")
     @Override
     public ResponseEntity<Response> buy(@PathVariable String userId, @PathVariable String stockName, @RequestParam int amount) {
-       try {
-           boolean success = stockBalanceService.stockTransaction(userId, stockName, amount, TransactionType.BUY, lock);
-           if (success) {
-               return new ResponseEntity<>(new Response("Stock transaction was successful, transaction type: " + TransactionType.BUY), HttpStatus.OK);
-           } else {
-               log.error("An error has occurred for buy transaction for userId: " + userId + "please check logs for error");
-               return new ResponseEntity<>(new Response("Stock transaction was unsuccessful for userId: " + userId +  "transaction type: " + TransactionType.BUY), HttpStatus.BAD_REQUEST);
-           }
-
-       } catch (RuntimeException e) {
-           return new ResponseEntity<>(new Response("Stock transaction was unsuccessful, transaction type: " + TransactionType.BUY), HttpStatus.BAD_REQUEST);
-       }
+        return handleTransaction(userId, stockName, amount, TransactionType.BUY);
     }
 
-    @PostMapping("/sell/{userId}/{stockName}")
+    @PostMapping("/stock/sell/{userId}/{stockName}")
     @Override
     public ResponseEntity<Response> sell(@PathVariable String userId, @PathVariable String stockName, @RequestParam int amount) {
+        return handleTransaction(userId, stockName, amount, TransactionType.SELL);
+    }
+
+    private ResponseEntity<Response> handleTransaction(String userId, String stockName, int amount, TransactionType transactionType) {
         try {
-            boolean success = stockBalanceService.stockTransaction(userId, stockName, amount, TransactionType.SELL, lock);
+            boolean success = stockBalanceService.stockTransaction(userId, stockName, amount, transactionType, lock);
             if (success) {
-                return new ResponseEntity<>(new Response("Stock transaction was successful, transaction type: " + TransactionType.SELL), HttpStatus.OK);
+                return new ResponseEntity<>(new Response("Stock transaction was successful, transaction type: " + transactionType.name()), HttpStatus.OK);
             } else {
                 log.error("An error has occurred for sell transaction for userId: " + userId + "please check logs for error");
-                return new ResponseEntity<>(new Response("Stock transaction was unsuccessful for userId: " + userId +  "transaction type: " + TransactionType.SELL), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new Response("Stock transaction was unsuccessful for userId: " + userId +  "transaction type: " + transactionType.name()), HttpStatus.BAD_REQUEST);
             }
 
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(new Response("Stock transaction was unsuccessful, transaction type: " + TransactionType.SELL), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new Response("Stock transaction was unsuccessful, transaction type: " + transactionType.name()), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @GetMapping("/getStock/{stockName}")
+    @GetMapping("/stock/get/{stockName}")
     @Override
     public ResponseEntity<Response> getStock(@PathVariable String stockName) {
         Optional<Stock> optStock = stockBalanceService.getStock(stockName, lock);
@@ -106,7 +100,7 @@ public class WebControllerImpl implements WebController {
         }
     }
 
-    @GetMapping("/getBalance/{userId}")
+    @GetMapping("/balance/get/{userId}")
     @Override
     public ResponseEntity<Response> getBalance(@PathVariable String userId) {
         Optional<Balance> optBalance = stockBalanceService.getBalance(userId, lock);

@@ -25,9 +25,9 @@ import java.util.concurrent.locks.ReadWriteLock;
 public class StockBalanceService {
 
     @Autowired
-    private BalanceRepository balanceRepository;
-    @Autowired
     private StockRepository stockRepository;
+    @Autowired
+    private BalanceRepository balanceRepository;
     @Autowired
     private TransactionRepository transactionRepository;
 
